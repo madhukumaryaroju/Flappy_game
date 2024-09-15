@@ -47,6 +47,12 @@
     #resetButton:hover {
       background-color: #45a049;
     }
+    /* Increase canvas height on mobile devices */
+    @media (max-width: 600px) {
+      .game-container {
+        max-height: 80vh; /* Increase height for mobile screens */
+      }
+    }
   </style>
 </head>
 <body>
@@ -60,8 +66,12 @@
     const ctx = canvas.getContext('2d');
 
     // Set the canvas dimensions based on container size
-    canvas.width = canvas.parentElement.clientWidth; 
-    canvas.height = canvas.parentElement.clientHeight; 
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth; 
+      canvas.height = canvas.parentElement.clientHeight; 
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
     // Game variables
     let bird = { x: 50, y: 150, width: 40, height: 70 };
@@ -96,9 +106,21 @@
     // Bird flaps up when 'J' key is pressed
     document.addEventListener('keydown', (event) => {
       if (event.key === 'j' || event.key === 'J') {
-        velocity = lift;  // Make the bird fly up
+        flap();
       }
     });
+
+    // Bird flaps up when the screen is touched
+    document.addEventListener('touchstart', (event) => {
+      event.preventDefault(); // Prevent scrolling on touch devices
+      flap();
+    });
+
+    function flap() {
+      if (gameRunning) {
+        velocity = lift;  // Make the bird fly up
+      }
+    }
 
     // Reset the game
     document.getElementById('resetButton').addEventListener('click', resetGame);
