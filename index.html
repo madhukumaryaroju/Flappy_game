@@ -96,9 +96,21 @@
     // Bird flaps up when 'J' key is pressed
     document.addEventListener('keydown', (event) => {
       if (event.key === 'j' || event.key === 'J') {
-        velocity = lift;  // Make the bird fly up
+        flap();
       }
     });
+
+    // Bird flaps up when the screen is touched
+    document.addEventListener('touchstart', (event) => {
+      event.preventDefault(); // Prevent scrolling on touch devices
+      flap();
+    });
+
+    function flap() {
+      if (gameRunning) {
+        velocity = lift;  // Make the bird fly up
+      }
+    }
 
     // Reset the game
     document.getElementById('resetButton').addEventListener('click', resetGame);
