@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floppy Bird Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #87CEEB;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden; /* Prevent scrolling */
+    }
+    .game-container {
+      text-align: center;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 400px; /* Limit maximum width */
+      max-height: 600px; /* Limit maximum height */
+    }
+    canvas {
+      border: 5px solid #333;
+      border-radius: 10px;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    #resetButton {
+      position: absolute;
+      bottom: 10px; /* Make button visible at the bottom */
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px; /* Adjust font size */
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #resetButton:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <button id="resetButton">Reset Game</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set the canvas dimensions based on container size
+    canvas.width = canvas.parentElement.clientWidth; 
+    canvas.height = canvas.parentElement.clientHeight; 
+
+    // Game variables
+    let bird = { x: 50, y: 150, width: 20, height: 20 };
+    let gravity = 0.15; // Slower gravity
+    let velocity = 0;
+    let lift = -4; // Slower lift
+    let score = 0;
+    let pipes = [];
+    let pipeWidth = 50;
+    let pipeGap = 200; // Initial gap between pipes
+    let pipeSpeed = 1; // Pipe speed
+    let gameRunning = true;
+
+    // Load bird image
+    const birdImg = new Image();
+    birdImg.src = 'pngwing.com.png';
+
+    // Load background image
+    const bgImg = new Image();
+    bgImg.src = 'bg.jpg';
+
+    let imagesLoaded = 0;
+    [birdImg, bgImg].forEach(img => {
+      img.onload = () => {
+        imagesLoaded++;
+        if (imagesLoaded === 2) {
+          gameLoop();
+        }
+      };
+    });
+
+    // Bird flaps up when 'J' key is pressed
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'j' || event.key === 'J') {
+        velocity = lift;  // Make the bird fly up
+      }
+    });
+
+    // Reset the game
+    document.getElementById('resetButton').addEventListener('click', resetGame);
+
+    // Create pipes
+    function generatePipes() {
+      const pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap));
+      pipes.push({
+        x: canvas.width,
+        top: pipeHeight,
+        bottom: pipeHeight + pipeGap
+      });
+    }
+
+    // Reset game function
+    function resetGame() {
+      bird.y = 150;
+      velocity = 0;
+      gravity = 0.15; // Reset gravity to initial value
+      lift = -4; // Reset lift to initial value
+      pipeGap = 200; // Reset pipe gap to initial value
+      score = 0;
+      pipes = [];
+      pipeSpeed = 1;
+      gameRunning = true;
+      gameLoop();
+    }
+
+    // Main game loop
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw background image
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+      // Draw bird
+      ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+
+      // Apply gravity
+      velocity += gravity;
+      bird.y += velocity;
+
+      // Generate pipes at intervals
+      if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width / 2) {
+        generatePipes();
+      }
+
+      // Adjust game difficulty based on score
+      if (score > 70) {
+        pipeGap = 90; // Decrease gap between pipes
+        gravity = 0.35; // Increase gravity to make the bird fall faster
+        pipeSpeed = 3; // Increase pipe speed
+      } else if (score > 50) {
+        pipeGap = 130; // Decrease gap between pipes
+        gravity = 0.3; // Increase gravity
+        pipeSpeed = 2; // Increase pipe speed
+      } else if (score > 20) {
+        pipeGap = 150; // Decrease gap between pipes
+        gravity = 0.18; // Increase gravity
+        pipeSpeed = 1.5; // Increase pipe speed
+      }
+
+      // Move and draw pipes
+      pipes.forEach((pipe, index) => {
+        pipe.x -= pipeSpeed;
+
+        // Stylish top pipe
+        ctx.fillStyle = '#006400'; // Darker green color for pipes
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+
+        // Stylish bottom pipe
+        ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+
+        // Check for collision
+        if (
+          bird.x + bird.width > pipe.x &&
+          bird.x < pipe.x + pipeWidth &&
+          (bird.y < pipe.top || bird.y + bird.height > pipe.bottom)
+        ) {
+          gameRunning = false;
+        }
+
+        // Check if pipe is offscreen, and increment score
+        if (pipe.x + pipeWidth < 0) {
+          pipes.splice(index, 1);
+          score++;
+        }
+      });
+
+      // Draw score on the canvas
+      ctx.fillStyle = '#333';
+      ctx.font = '24px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Score: ${score}`, canvas.width - 20, 40);
+
+      // Check if bird hits the ground
+      if (bird.y + bird.height > canvas.height) {
+        gameRunning = false;
+      }
+
+      // Continue the game loop
+      if (gameRunning) {
+        requestAnimationFrame(gameLoop);
+      }
+    }
+  </script>
+</body>
+</html>
