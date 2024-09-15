@@ -181,97 +181,102 @@
       gameOverOverlay.style.display = 'none'; // Hide the overlay
       gameLoop();
     }
+// Main game loop
+function gameLoop() {
+  if (!gameRunning) return;
 
-    // Main game loop
-    function gameLoop() {
-      if (!gameRunning) return;
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Clear the canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Draw background image
+  ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
-      // Draw background image
-      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+  // Draw bird
+  ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
-      // Draw bird
-      ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+  // Apply gravity
+  velocity += gravity;
+  bird.y += velocity;
 
-      // Apply gravity
-      velocity += gravity;
-      bird.y += velocity;
+  // Make the bird fall automatically when the score hits 98
+  if (score >= 97) {
+    velocity = 10; // Adjust the fall speed as needed
+  }
 
-      // Generate pipes at intervals
-      if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width / 2) {
-        generatePipes();
-      }
+  // Generate pipes at intervals
+  if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width / 2) {
+    generatePipes();
+  }
 
-      // Adjust game difficulty based on score
-      if (score > 70) {
-        pipeGap = 90; // Decrease gap between pipes
-        gravity = 0.35; // Increase gravity to make the bird fall faster
-        pipeSpeed = 3; // Increase pipe speed
-        pipeWidth = 50; // Decrease pipe width
-      } else if (score > 50) {
-        pipeGap = 130; // Decrease gap between pipes
-        gravity = 0.3; // Increase gravity
-        pipeSpeed = 2; // Increase pipe speed
-        pipeWidth = 60; // Decrease pipe width
-      } else if (score > 30) {
-        pipeGap = 150; // Increase gap between pipes
-        gravity = 0.18; // Increase gravity
-        pipeSpeed = 1.5; // Increase pipe speed
-        pipeWidth = 70; // Keep pipe width increased until score reaches 30
-      } else {
-        pipeGap = 200; // Keep initial gap between pipes
-        pipeWidth = 70; // Keep initial pipe width
-      }
+  // Adjust game difficulty based on score
+  if (score > 70) {
+    pipeGap = 90; // Decrease gap between pipes
+    gravity = 0.35; // Increase gravity to make the bird fall faster
+    pipeSpeed = 3; // Increase pipe speed
+    pipeWidth = 50; // Decrease pipe width
+  } else if (score > 50) {
+    pipeGap = 130; // Decrease gap between pipes
+    gravity = 0.3; // Increase gravity
+    pipeSpeed = 2; // Increase pipe speed
+    pipeWidth = 60; // Decrease pipe width
+  } else if (score > 30) {
+    pipeGap = 150; // Increase gap between pipes
+    gravity = 0.18; // Increase gravity
+    pipeSpeed = 1.5; // Increase pipe speed
+    pipeWidth = 70; // Keep pipe width increased until score reaches 30
+  } else {
+    pipeGap = 200; // Keep initial gap between pipes
+    pipeWidth = 70; // Keep initial pipe width
+  }
 
-      // Move and draw pipes
-      pipes.forEach((pipe, index) => {
-        pipe.x -= pipeSpeed;
+  // Move and draw pipes
+  pipes.forEach((pipe, index) => {
+    pipe.x -= pipeSpeed;
 
-        // Stylish top pipe
-        ctx.fillStyle = '#006400'; // Darker green color for pipes
-        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+    // Stylish top pipe
+    ctx.fillStyle = '#006400'; // Darker green color for pipes
+    ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
 
-        // Stylish bottom pipe
-        ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+    // Stylish bottom pipe
+    ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
 
-        // Check for collision
-        if (
-          bird.x + bird.width > pipe.x &&
-          bird.x < pipe.x + pipeWidth &&
-          (bird.y < pipe.top || bird.y + bird.height > pipe.bottom)
-        ) {
-          gameRunning = false;
-        }
-
-        // Check if pipe is offscreen, and increment score
-        if (pipe.x + pipeWidth < 0) {
-          pipes.splice(index, 1);
-          score++;
-        }
-      });
-
-      // Draw score on the canvas
-      ctx.fillStyle = '#333';
-      ctx.font = '24px Arial';
-      ctx.textAlign = 'right';
-      ctx.fillText(`Score: ${score}`, canvas.width - 20, 40);
-
-      // Check if bird hits the ground
-      if (bird.y + bird.height > canvas.height) {
-        gameRunning = false;
-      }
-
-      // Display game over screen if the game has stopped
-      if (!gameRunning) {
-        gameOverOverlay.style.display = 'flex'; // Show the overlay
-        finalScoreElement.textContent = score; // Update the final score
-      } else {
-        // Continue the game loop
-        requestAnimationFrame(gameLoop);
-      }
+    // Check for collision
+    if (
+      bird.x + bird.width > pipe.x &&
+      bird.x < pipe.x + pipeWidth &&
+      (bird.y < pipe.top || bird.y + bird.height > pipe.bottom)
+    ) {
+      gameRunning = false;
     }
+
+    // Check if pipe is offscreen, and increment score
+    if (pipe.x + pipeWidth < 0) {
+      pipes.splice(index, 1);
+      score++;
+    }
+  });
+
+  // Draw score on the canvas
+  ctx.fillStyle = '#333';
+  ctx.font = '24px Arial';
+  ctx.textAlign = 'right';
+  ctx.fillText(`Score: ${score}`, canvas.width - 20, 40);
+
+  // Check if bird hits the ground
+  if (bird.y + bird.height > canvas.height) {
+    gameRunning = false;
+  }
+
+  // Display game over screen if the game has stopped
+  if (!gameRunning) {
+    gameOverOverlay.style.display = 'flex'; // Show the overlay
+    finalScoreElement.textContent = score; // Update the final score
+  } else {
+    // Continue the game loop
+    requestAnimationFrame(gameLoop);
+  }
+}
+
   </script>
 </body>
 </html>
