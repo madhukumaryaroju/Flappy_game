@@ -64,13 +64,13 @@
     canvas.height = canvas.parentElement.clientHeight; 
 
     // Game variables
-    let bird = { x: 50, y: 150, width: 20, height: 20 };
+    let bird = { x: 50, y: 150, width: 40, height: 70 };
     let gravity = 0.15; // Slower gravity
     let velocity = 0;
     let lift = -4; // Slower lift
     let score = 0;
     let pipes = [];
-    let pipeWidth = 50;
+    let pipeWidth = 70; // Increased pipe width for initial scores
     let pipeGap = 200; // Initial gap between pipes
     let pipeSpeed = 1; // Pipe speed
     let gameRunning = true;
@@ -96,21 +96,9 @@
     // Bird flaps up when 'J' key is pressed
     document.addEventListener('keydown', (event) => {
       if (event.key === 'j' || event.key === 'J') {
-        flap();
-      }
-    });
-
-    // Bird flaps up when the screen is touched
-    document.addEventListener('touchstart', (event) => {
-      event.preventDefault(); // Prevent scrolling on touch devices
-      flap();
-    });
-
-    function flap() {
-      if (gameRunning) {
         velocity = lift;  // Make the bird fly up
       }
-    }
+    });
 
     // Reset the game
     document.getElementById('resetButton').addEventListener('click', resetGame);
@@ -131,7 +119,8 @@
       velocity = 0;
       gravity = 0.15; // Reset gravity to initial value
       lift = -4; // Reset lift to initial value
-      pipeGap = 200; // Reset pipe gap to initial value
+      pipeGap = 400; // Reset pipe gap to initial value
+      pipeWidth = 70; // Reset pipe width to initial value
       score = 0;
       pipes = [];
       pipeSpeed = 1;
@@ -166,14 +155,20 @@
         pipeGap = 90; // Decrease gap between pipes
         gravity = 0.35; // Increase gravity to make the bird fall faster
         pipeSpeed = 3; // Increase pipe speed
+        pipeWidth = 50; // Decrease pipe width
       } else if (score > 50) {
         pipeGap = 130; // Decrease gap between pipes
         gravity = 0.3; // Increase gravity
         pipeSpeed = 2; // Increase pipe speed
-      } else if (score > 20) {
-        pipeGap = 150; // Decrease gap between pipes
+        pipeWidth = 60; // Decrease pipe width
+      } else if (score > 30) {
+        pipeGap = 150; // Increase gap between pipes
         gravity = 0.18; // Increase gravity
         pipeSpeed = 1.5; // Increase pipe speed
+        pipeWidth = 70; // Keep pipe width increased until score reaches 30
+      } else {
+        pipeGap = 200; // Keep initial gap between pipes
+        pipeWidth = 70; // Keep initial pipe width
       }
 
       // Move and draw pipes
